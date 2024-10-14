@@ -57,11 +57,11 @@ header tcp_t {
 }
 
 header mqtt_t { 
-   bit<4> messageType; // Este campo armazena os 4 bits que identificam o tipo de mensagem MQTT.
-    bit<4> flags;       // Flags para o controle de qualidade, retenção, etc.
-    bit<8> len;         // Tamanho da mensagem
-    bit<16> tlen;       // Tamanho do tópico
-    bit<56> topic;      // Tópico da mensagem
+   bit<4> messageType; 
+    bit<4> flags;      
+    bit<8> len;        
+    bit<16> tlen;      
+    bit<56> topic;     
     bit<16> msg;  
 }
 header udp_t {
@@ -158,16 +158,16 @@ bit<16> extracted_topic;
     }
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
 
-        //set the src mac address as the previous dst, this is not correct right?
+       
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
 
-       //set the destination mac address that we got from the match in the table
+       
         hdr.ethernet.dstAddr = dstAddr;
 
-        //set the output port that we also get from the table
+       
         standard_metadata.egress_spec = port;
 
-        //decrease ttl by 1
+       
           if (hdr.ipv4.ttl > 1) {
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
         } 
@@ -188,7 +188,7 @@ bit<16> extracted_topic;
 
     apply {
 
-        //only if IPV4 the rule is applied. Therefore other packets will not be forwarded.
+      
         
         
            if (hdr.ipv4.isValid()){    
@@ -202,6 +202,7 @@ bit<16> extracted_topic;
                     if (hdr.ipv4.dstAddr == 0x0a000202) {
                          clone(CloneType.I2E, 700);
                           meta.is_clone = 1;
+//clona caso o destino seja o host 2, marca o pacote clonado com o metadado is_clone = 1
                        ipv4_forward(0x000000000202,2);
                     }
                     if (hdr.ipv4.dstAddr == 0x0a000302) {
@@ -284,7 +285,7 @@ control MyEgress(inout headers hdr,
     apply { 
 
     	 if (meta.is_clone == 1) {
-            // Pacote clonado: altere o endereço de destino
+            // Pacote clonado: altere o endereço de destino e transforme em UDP
             
             log_msg("Pacote clonado");
             convert_tcp_to_udp(3); 
